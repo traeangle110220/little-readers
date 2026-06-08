@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#6C63FF">
+<title>Little Readers</title>
+<link rel="manifest" href="manifest.json">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'Segoe UI',sans-serif; }
+body { background:#f8f9ff; min-height:100vh; overflow-x:hidden; }
+
+/* ===== LICENSE SCREEN ===== */
+#licenseScreen { min-height:100vh; background:linear-gradient(135deg,#6C63FF,#48CAE4); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+.license-card { background:white; border-radius:24px; padding:40px 32px; width:100%; max-width:400px; box-shadow:0 20px 60px rgba(108,99,255,0.3); text-align:center; }
+.license-logo { font-size:64px; margin-bottom:16px; }
+.license-card h1 { font-size:28px; color:#6C63FF; margin-bottom:8px; }
+.license-card p { color:#888; font-size:15px; margin-bottom:32px; }
+.license-input { width:100%; padding:16px; font-size:18px; border:2px solid #e0e0e0; border-radius:12px; text-align:center; letter-spacing:2px; text-transform:uppercase; outline:none; transition:border-color 0.3s; }
+.license-input:focus { border-color:#6C63FF; }
+.license-btn { width:100%; margin-top:16px; padding:16px; background:linear-gradient(135deg,#6C63FF,#48CAE4); color:white; border:none; border-radius:12px; font-size:18px; font-weight:bold; cursor:pointer; transition:opacity 0.2s; }
+.license-btn:active { opacity:0.8; }
+.license-error { color:#ff4444; margin-top:12px; font-size:14px; min-height:20px; }
+.license-loading { color:#6C63FF; margin-top:8px; font-size:14px; }
+
+/* ===== SCREENS ===== */
+#app { display:none; }
+.screen { display:none; min-height:100vh; }
+.screen.active { display:block; }
+
+/* ===== HEADER ===== */
+.header { padding:16px 20px; display:flex; align-items:center; gap:12px; color:white; }
+.back-btn { font-size:28px; background:none; border:none; color:white; cursor:pointer; line-height:1; }
+.header-title { font-size:18px; font-weight:bold; flex:1; }
+
+/* ===== HOME SCREEN ===== */
+#homeScreen { background:linear-gradient(180deg,#6C63FF,#48CAE4); }
+.home-body { padding:24px; }
+.home-title { text-align:center; color:white; font-size:30px; font-weight:bold; margin-bottom:6px; }
+.home-subtitle { text-align:center; color:rgba(255,255,255,0.8); font-size:16px; margin-bottom:32px; }
+.level-card { background:white; border-radius:20px; padding:18px 20px; margin-bottom:14px; display:flex; align-items:center; gap:14px; box-shadow:0 6px 20px rgba(0,0,0,0.1); cursor:pointer; transition:transform 0.15s; }
+.level-card:active { transform:scale(0.98); }
+.level-icon { width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0; }
+.level-info { flex:1; }
+.level-name { font-size:20px; font-weight:bold; }
+.level-desc { font-size:12px; color:#888; margin-top:2px; }
+.level-stars { font-size:13px; margin-top:3px; }
+.stats-bar { background:rgba(255,255,255,0.2); border-radius:16px; padding:14px; margin-top:16px; display:flex; justify-content:space-around; }
+.stat { text-align:center; color:white; }
+.stat-emoji { font-size:22px; display:block; }
+.stat-val { font-size:20px; font-weight:bold; display:block; }
+.stat-lbl { font-size:11px; opacity:0.8; display:block; }
+
+/* ===== LANG/TYPE SCREEN ===== */
+.select-body { padding:24px; background:#f8f9ff; min-height:calc(100vh - 60px); }
+.select-heading { font-size:22px; font-weight:bold; margin-bottom:6px; }
+.select-sub { font-size:14px; color:#888; margin-bottom:28px; }
+.select-card { background:white; border-radius:18px; padding:20px; margin-bottom:14px; display:flex; align-items:center; gap:14px; box-shadow:0 4px 14px rgba(0,0,0,0.07); cursor:pointer; transition:transform 0.15s; }
+.select-card:active { transform:scale(0.98); }
+.select-flag { font-size:44px; }
+.select-card-info h3 { font-size:20px; font-weight:bold; }
+.select-card-info p { font-size:13px; color:#888; }
+.select-arrow { color:#ccc; font-size:22px; margin-left:auto; }
+
+/* ===== LESSON LIST ===== */
+.lesson-list-body { padding:14px; background:#f8f9ff; min-height:calc(100vh - 60px); }
+.lesson-hint { font-size:14px; color:#888; margin-bottom:14px; padding:0 4px; }
+.lesson-item { background:white; border-radius:14px; padding:14px; margin-bottom:10px; display:flex; align-items:center; gap:12px; box-shadow:0 3px 10px rgba(0,0,0,0.06); cursor:pointer; transition:transform 0.15s; }
+.lesson-item:active { transform:scale(0.98); }
+.lesson-emoji-box { width:46px; height:46px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+.lesson-info { flex:1; }
+.lesson-name { font-size:14px; font-weight:bold; }
+.lesson-type-tag { font-size:11px; color:#888; margin-top:2px; }
+.lesson-start { padding:5px 12px; border-radius:20px; font-size:11px; font-weight:bold; white-space:nowrap; }
+
+/* ===== READING SCREEN ===== */
+#readingScreen { background:#f8f9ff; display:flex; flex-direction:column; min-height:100vh; }
+.reading-header { flex-shrink:0; }
+.progress-row { padding:12px 20px 0; display:flex; align-items:center; gap:8px; }
+.prog-count { font-size:13px; font-weight:bold; }
+.prog-bar-bg { flex:1; height:9px; background:#e0e0e0; border-radius:5px; overflow:hidden; }
+.prog-bar-fill { height:100%; border-radius:5px; transition:width 0.4s; }
+.prog-stars { font-size:13px; }
+.wrong-row { text-align:center; padding:6px; min-height:28px; }
+.reading-body { flex:1; padding:16px 20px; display:flex; flex-direction:column; }
+.word-card { background:white; border-radius:22px; padding:24px; box-shadow:0 6px 20px rgba(0,0,0,0.09); text-align:center; margin-bottom:12px; }
+.word-emoji { font-size:52px; display:block; margin-bottom:14px; }
+.word-text { font-weight:bold; letter-spacing:1.5px; line-height:1.4; }
+.word-hint { font-size:13px; color:#aaa; margin-top:8px; }
+.heard-txt { font-size:12px; color:#bbb; font-style:italic; margin-top:6px; }
+.reveal-bar { padding:12px 16px; border-radius:14px; border:2px solid #2196F3; background:rgba(33,150,243,0.07); display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; font-size:14px; font-weight:bold; color:#2196F3; margin-bottom:10px; transition:background 0.2s; }
+.reveal-bar:active { background:rgba(33,150,243,0.18); }
+.feedback-bar { padding:12px 16px; border-radius:14px; border-width:2px; border-style:solid; text-align:center; font-size:14px; font-weight:bold; margin-bottom:10px; white-space:pre-line; }
+.mic-section { margin-top:auto; padding:12px 20px 28px; text-align:center; }
+.mic-hint { font-size:15px; color:#888; margin-bottom:8px; font-weight:500; }
+.wave-row { display:flex; align-items:center; justify-content:center; gap:4px; height:48px; margin-bottom:10px; }
+.wave-b { width:8px; border-radius:4px; transition:height 0.08s; }
+.mic-button { width:88px; height:88px; border-radius:50%; border:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:38px; box-shadow:0 8px 24px rgba(0,0,0,0.18); transition:transform 0.15s; }
+.mic-button:active { transform:scale(0.94); }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+.pulsing { animation:pulse 0.8s ease-in-out infinite; }
+
+/* ===== SPELLING SCREEN ===== */
+#spellingScreen { background:#f8f9ff; display:flex; flex-direction:column; min-height:100vh; }
+.spell-body { flex:1; padding:16px 20px; display:flex; flex-direction:column; }
+.spell-card { background:white; border-radius:22px; padding:24px; box-shadow:0 6px 20px rgba(0,0,0,0.09); text-align:center; margin-bottom:12px; }
+.spell-emoji { font-size:52px; display:block; margin-bottom:12px; }
+.spell-instruction { font-size:16px; color:#888; margin-bottom:14px; }
+.listen-btn { width:100%; padding:13px; border-radius:12px; border-width:2px; border-style:solid; background:transparent; font-size:15px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:12px; transition:background 0.2s; }
+.listen-btn:active { opacity:0.8; }
+.spell-input { width:100%; padding:14px; font-size:22px; border:2px solid #e0e0e0; border-radius:12px; text-align:center; letter-spacing:2px; outline:none; transition:border-color 0.3s; margin-bottom:10px; }
+.check-btn { width:100%; padding:14px; border:none; border-radius:12px; font-size:17px; font-weight:bold; cursor:pointer; color:white; transition:opacity 0.2s; }
+.check-btn:active { opacity:0.8; }
+
+/* ===== COMPLETION SCREEN ===== */
+#completionScreen { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px; text-align:center; min-height:100vh; overflow-y:auto; }
+.comp-trophy { font-size:80px; margin-bottom:16px; }
+.comp-title { font-size:30px; font-weight:bold; color:white; margin-bottom:10px; }
+.comp-stars-row { font-size:34px; margin:12px 0; }
+.comp-sub { font-size:18px; color:rgba(255,255,255,0.8); margin-bottom:36px; }
+.comp-btn { width:100%; max-width:300px; padding:15px; border-radius:30px; font-size:17px; font-weight:bold; cursor:pointer; margin-bottom:10px; border:none; transition:opacity 0.2s; }
+.comp-btn:active { opacity:0.8; }
+.comp-link { color:white; font-size:15px; text-decoration:underline; cursor:pointer; margin-top:6px; display:block; }
+</style>
+</head>
+<body>
+
+<!-- LICENSE SCREEN -->
+<div id="licenseScreen">
+  <div class="license-card">
+    <div class="license-logo">📚</div>
+    <h1>Little Readers</h1>
+    <p>Enter your license code to continue</p>
+    <input class="license-input" id="codeInput" type="text" placeholder="LR-XXXX-XXXXX" maxlength="20" autocomplete="off">
+    <button class="license-btn" onclick="verifyCode()">✓ Verify Code</button>
+    <div class="license-error" id="licenseError"></div>
+    <div class="license-loading" id="licenseLoading"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- HOME -->
+  <div id="homeScreen" class="screen active">
+    <div style="height:24px"></div>
+    <div class="home-body">
+      <div class="home-title">📚 Little Readers</div>
+      <div class="home-subtitle">Choose your reading level!</div>
+      <div class="level-card" onclick="goLevel('Kinder')">
+        <div class="level-icon" style="background:rgba(255,107,107,0.15)">🌱</div>
+        <div class="level-info">
+          <div class="level-name" style="color:#FF6B6B">Kinder</div>
+          <div class="level-desc">Abakada • ABC • Simple Words</div>
+          <div class="level-stars">⭐</div>
+        </div>
+        <span style="color:#ccc;font-size:22px">›</span>
+      </div>
+      <div class="level-card" onclick="goLevel('Grade 1')">
+        <div class="level-icon" style="background:rgba(255,179,71,0.15)">🌿</div>
+        <div class="level-info">
+          <div class="level-name" style="color:#FFB347">Grade 1</div>
+          <div class="level-desc">Words • Sentences • Stories</div>
+          <div class="level-stars">⭐⭐</div>
+        </div>
+        <span style="color:#ccc;font-size:22px">›</span>
+      </div>
+      <div class="level-card" onclick="goLevel('Grade 2')">
+        <div class="level-icon" style="background:rgba(107,203,119,0.15)">🌳</div>
+        <div class="level-info">
+          <div class="level-name" style="color:#6BCB77">Grade 2</div>
+          <div class="level-desc">Paragraphs • Long Stories</div>
+          <div class="level-stars">⭐⭐⭐</div>
+        </div>
+        <span style="color:#ccc;font-size:22px">›</span>
+      </div>
+      <div class="stats-bar">
+        <div class="stat"><span class="stat-emoji">⭐</span><span class="stat-val" id="statStars">0</span><span class="stat-lbl">Stars</span></div>
+        <div class="stat"><span class="stat-emoji">📖</span><span class="stat-val" id="statLessons">0</span><span class="stat-lbl">Lessons</span></div>
+        <div class="stat"><span class="stat-emoji">🏆</span><span class="stat-val" id="statBadges">0</span><span class="stat-lbl">Badges</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LANGUAGE SELECT -->
+  <div id="langScreen" class="screen">
+    <div class="header" id="langHeader">
+      <button class="back-btn" onclick="goScreen('homeScreen')">‹</button>
+      <span class="header-title" id="langHeaderTitle">Select Level</span>
+    </div>
+    <div class="select-body">
+      <div class="select-heading" id="langHeading">Choose Language</div>
+      <div class="select-sub">Piliin ang wika</div>
+      <div class="select-card" onclick="goLang('Filipino')">
+        <div class="select-flag">🇵🇭</div>
+        <div class="select-card-info">
+          <h3 id="filName">Filipino</h3>
+          <p id="filDesc">Abakada at mga salita</p>
+        </div>
+        <span class="select-arrow">›</span>
+      </div>
+      <div class="select-card" onclick="goLang('English')">
+        <div class="select-flag">🇺🇸</div>
+        <div class="select-card-info">
+          <h3 id="engName">English</h3>
+          <p id="engDesc">Alphabet and words</p>
+        </div>
+        <span class="select-arrow">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPE SELECT (Reading/Spelling) -->
+  <div id="typeScreen" class="screen">
+    <div class="header" id="typeHeader">
+      <button class="back-btn" onclick="goScreen('langScreen')">‹</button>
+      <span class="header-title" id="typeHeaderTitle">Choose Activity</span>
+    </div>
+    <div class="select-body">
+      <div class="select-heading">Choose Activity</div>
+      <div class="select-sub" id="typeSubtitle">Piliin ang aktibidad</div>
+      <div class="select-card" onclick="goType('reading')">
+        <div class="select-flag">📖</div>
+        <div class="select-card-info">
+          <h3 id="readingLabel">Reading</h3>
+          <p id="readingDesc">Read words and stories out loud</p>
+        </div>
+        <span class="select-arrow">›</span>
+      </div>
+      <div class="select-card" onclick="goType('spelling')">
+        <div class="select-flag">✏️</div>
+        <div class="select-card-info">
+          <h3 id="spellingLabel">Spelling</h3>
+          <p id="spellingDesc">Listen and type the correct spelling</p>
+        </div>
+        <span class="select-arrow">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON LIST -->
+  <div id="lessonScreen" class="screen">
+    <div class="header" id="lessonHeader">
+      <button class="back-btn" onclick="goScreen('typeScreen')">‹</button>
+      <span class="header-title" id="lessonHeaderTitle">Lessons</span>
+    </div>
+    <div class="lesson-list-body">
+      <div class="lesson-hint" id="lessonHint">Choose a lesson to start! 📖</div>
+      <div id="lessonList"></div>
+    </div>
+  </div>
+
+  <!-- READING SCREEN -->
+  <div id="readingScreen" class="screen">
+    <div class="reading-header">
+      <div class="header" id="readingHeader">
+        <button class="back-btn" onclick="exitLesson()">‹</button>
+        <span class="header-title" id="readingHeaderTitle">Lesson</span>
+      </div>
+      <div class="progress-row">
+        <span class="prog-count" id="progCount">1/5</span>
+        <div class="prog-bar-bg"><div class="prog-bar-fill" id="progFill" style="width:20%"></div></div>
+        <span class="prog-stars" id="progStars"></span>
+      </div>
+      <div class="wrong-row" id="wrongRow"></div>
+    </div>
+    <div class="reading-body">
+      <div class="word-card" id="wordCard">
+        <span class="word-emoji" id="wordEmoji">🐱</span>
+        <div class="word-text" id="wordText" style="font-size:48px">cat</div>
+        <div class="word-hint" id="wordHint">Read this out loud! 🎤</div>
+        <div class="heard-txt" id="heardTxt"></div>
+      </div>
+      <div class="reveal-bar" id="revealBar" style="display:none" onclick="doReveal()">
+        <span>🔊</span><span id="revealTxt">Hear correct pronunciation</span>
+      </div>
+      <div class="feedback-bar" id="feedbackBar" style="display:none"></div>
+      <div class="mic-section">
+        <div class="mic-hint" id="micHint">Tap to read! 👇</div>
+        <div class="wave-row" id="waveRow">
+          <div class="wave-b" style="height:6px;background:#e0e0e0"></div>
+          <div class="wave-b" style="height:6px;background:#e0e0e0"></div>
+          <div class="wave-b" style="height:6px;background:#e0e0e0"></div>
+          <div class="wave-b" style="height:6px;background:#e0e0e0"></div>
+          <div class="wave-b" style="height:6px;background:#e0e0e0"></div>
+        </div>
+        <button class="mic-button" id="micBtn" onclick="toggleMic()">🎤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPELLING SCREEN -->
+  <div id="spellingScreen" class="screen">
+    <div class="reading-header">
+      <div class="header" id="spellingHeader">
+        <button class="back-btn" onclick="exitLesson()">‹</button>
+        <span class="header-title" id="spellingHeaderTitle">Spelling</span>
+      </div>
+      <div class="progress-row">
+        <span class="prog-count" id="spProgCount">1/10</span>
+        <div class="prog-bar-bg"><div class="prog-bar-fill" id="spProgFill" style="width:10%"></div></div>
+        <span class="prog-stars" id="spProgStars"></span>
+      </div>
+      <div class="wrong-row" id="spWrongRow"></div>
+    </div>
+    <div class="spell-body">
+      <div class="spell-card">
+        <span class="spell-emoji" id="spEmoji">🐱</span>
+        <div class="spell-instruction" id="spInstruction">Listen and spell the word</div>
+        <button class="listen-btn" id="listenBtn" onclick="speakWord()">
+          🔊 <span id="listenTxt">Hear the word</span>
+        </button>
+        <input class="spell-input" id="spInput" type="text" placeholder="Type spelling here...">
+        <button class="check-btn" id="checkBtn" onclick="checkSpell()">✓ Check Spelling</button>
+      </div>
+      <div class="feedback-bar" id="spFeedback" style="display:none"></div>
+      <div class="reveal-bar" id="spRevealBar" style="display:none" onclick="revealSpell()">
+        <span>💡</span><span id="spRevealTxt">Reveal correct spelling</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION SCREEN -->
+  <div id="completionScreen" class="screen">
+    <div class="comp-trophy">🏆</div>
+    <div class="comp-title" id="compTitle">Lesson Complete!</div>
+    <div class="comp-stars-row" id="compStars">⭐⭐⭐</div>
+    <div class="comp-sub" id="compSub">You earned 3 stars!</div>
+    <button class="comp-btn" id="retryBtn" onclick="retryLesson()" style="background:rgba(255,255,255,0.3);color:white;border:2px solid white">🔄 Retry Lesson</button>
+    <button class="comp-btn" id="homeBtn" onclick="goScreen('homeScreen')" style="background:white">🏠 Back to Home</button>
+    <span class="comp-link" id="moreLessonsLink" onclick="goScreen('lessonScreen')">Try More Lessons</span>
+  </div>
+
+</div><!-- end #app -->
+
+<!-- Load lesson data -->
+<script src="lessons.js"></script>
+
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const SHEET_ID = '16uCaRXYT5FKbuUPkZ0n3m2unUtFlGNG4VugkjZtbRwk';
+const SHEET_NAME = 'Sheet1';
+
+// ============================================================
+// LICENSE SYSTEM
+// ============================================================
+async function verifyCode() {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  const errEl = document.getElementById('licenseError');
+  const loadEl = document.getElementById('licenseLoading');
+  if (!code) { errEl.textContent = 'Please enter a license code.'; return; }
+  errEl.textContent = '';
+  loadEl.textContent = '🔍 Verifying...';
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+    const res = await fetch(url);
+    const csv = await res.text();
+    const rows = csv.split('\n').map(r => r.split(',').map(c => c.replace(/"/g,'').trim()));
+    let found = false, expired = false;
+    for (let i = 1; i < rows.length; i++) {
+      const [rowCode, expiry] = rows[i];
+      if (rowCode === code) {
+        found = true;
+        if (new Date(expiry) < new Date()) expired = true;
+        break;
+      }
+    }
+    loadEl.textContent = '';
+    if (!found) errEl.textContent = '❌ Invalid license code. Please try again.';
+    else if (expired) errEl.textContent = '⏰ License expired. Please contact support to renew.';
+    else { localStorage.setItem('lr_code', code); startApp(); }
+  } catch(e) {
+    loadEl.textContent = '';
+    const saved = localStorage.getItem('lr_code');
+    if (saved === code) startApp();
+    else errEl.textContent = '⚠️ No internet. Please connect and try again.';
+  }
+}
+
+function startApp() {
+  document.getElementById('licenseScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadStats(); updateStats();
+}
+
+// Auto-login
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('lr_code');
+  if (saved) { document.getElementById('codeInput').value = saved; startApp(); }
+  document.getElementById('codeInput').addEventListener('keypress', e => { if(e.key==='Enter') verifyCode(); });
+  document.getElementById('spInput').addEventListener('keypress', e => { if(e.key==='Enter') checkSpell(); });
+});
+
+// ============================================================
+// APP STATE
+// ============================================================
+let curLevel='', curLang='', curType='reading';
+let curLessons=[], curLessonIdx=0, curWordIdx=0;
+let stars=0, wrongCnt=0, isListening=false;
+let recognition=null, waveInt=null, soundLvl=0;
+let stats={stars:0,lessons:0,badges:0};
+
+function loadStats() { const s=localStorage.getItem('lr_stats'); if(s) stats=JSON.parse(s); }
+function saveStats() { localStorage.setItem('lr_stats',JSON.stringify(stats)); updateStats(); }
+function updateStats() {
+  document.getElementById('statStars').textContent=stats.stars;
+  document.getElementById('statLessons').textContent=stats.lessons;
+  document.getElementById('statBadges').textContent=stats.badges;
+}
+
+function color(level) {
+  if(level==='Kinder') return '#FF6B6B';
+  if(level==='Grade 1') return '#FFB347';
+  return '#6BCB77';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goLevel(level) {
+  curLevel = level;
+  const c = color(level);
+  document.getElementById('langHeader').style.background = c;
+  document.getElementById('langHeaderTitle').textContent = level;
+  document.getElementById('langHeading').style.color = c;
+  document.getElementById('filName').style.color = c;
+  document.getElementById('engName').style.color = c;
+  const subs = { 'Kinder':['Abakada at mga salita','Alphabet and words'], 'Grade 1':['Mga salita at pangungusap','Words and sentences'], 'Grade 2':['Mga talata at kwento','Paragraphs and stories'] };
+  document.getElementById('filDesc').textContent = subs[level][0];
+  document.getElementById('engDesc').textContent = subs[level][1];
+  goScreen('langScreen');
+}
+
+function goLang(lang) {
+  curLang = lang;
+  const c = color(curLevel);
+  const isFil = lang === 'Filipino';
+  document.getElementById('typeHeader').style.background = c;
+  document.getElementById('typeHeaderTitle').textContent = `${curLevel} - ${lang}`;
+  document.getElementById('typeSubtitle').textContent = isFil ? 'Piliin ang aktibidad' : 'Choose an activity';
+  document.getElementById('readingLabel').textContent = isFil ? 'Pagbabasa' : 'Reading';
+  document.getElementById('readingDesc').textContent = isFil ? 'Basahin nang malakas' : 'Read words and stories out loud';
+  document.getElementById('spellingLabel').textContent = isFil ? 'Ispeling' : 'Spelling';
+  document.getElementById('spellingDesc').textContent = isFil ? 'Pakinggan at i-spell ang salita' : 'Listen and type the correct spelling';
+  goScreen('typeScreen');
+}
+
+function goType(type) {
+  curType = type;
+  curLessons = getLessons(curLevel, curLang, type);
+  const c = color(curLevel);
+  const isFil = curLang === 'Filipino';
+  document.getElementById('lessonHeader').style.background = c;
+  document.getElementById('lessonHeaderTitle').textContent = `${curLevel} - ${curLang}`;
+  document.getElementById('lessonHint').textContent = isFil ? 'Pumili ng aralin! 📖' : 'Choose a lesson! 📖';
+  renderLessons(c);
+  goScreen('lessonScreen');
+}
+
+function getLessons(level, lang, type) {
+  try {
+    if (type === 'spelling') {
+      // Try FULL merged arrays first, fallback to base arrays
+      if (level==='Kinder' && lang==='Filipino') {
+        return (typeof SPELL_KINDER_FIL_FULL !== 'undefined') ? SPELL_KINDER_FIL_FULL : SPELL_KINDER_FIL;
+      }
+      if (level==='Kinder' && lang==='English') {
+        return (typeof SPELL_KINDER_ENG_FULL !== 'undefined') ? SPELL_KINDER_ENG_FULL : SPELL_KINDER_ENG;
+      }
+      if (level==='Grade 1' && lang==='Filipino') {
+        return (typeof SPELL_GRADE1_FIL_FULL !== 'undefined') ? SPELL_GRADE1_FIL_FULL : SPELL_GRADE1_FIL;
+      }
+      if (level==='Grade 1' && lang==='English') {
+        return (typeof SPELL_GRADE1_ENG_FULL !== 'undefined') ? SPELL_GRADE1_ENG_FULL : SPELL_GRADE1_ENG;
+      }
+      if (level==='Grade 2' && lang==='Filipino') {
+        return (typeof SPELL_GRADE2_FIL_FULL !== 'undefined') ? SPELL_GRADE2_FIL_FULL : SPELL_GRADE2_FIL;
+      }
+      return (typeof SPELL_GRADE2_ENG_FULL !== 'undefined') ? SPELL_GRADE2_ENG_FULL : SPELL_GRADE2_ENG;
+    }
+    // Reading lessons
+    if (level==='Kinder' && lang==='Filipino') return KINDER_TAGALOG;
+    if (level==='Kinder' && lang==='English') return KINDER_ENGLISH;
+    if (level==='Grade 1' && lang==='Filipino') return GRADE1_TAGALOG;
+    if (level==='Grade 1' && lang==='English') return GRADE1_ENGLISH;
+    if (level==='Grade 2' && lang==='Filipino') return GRADE2_TAGALOG;
+    return GRADE2_ENGLISH;
+  } catch(e) {
+    console.error('getLessons error:', e);
+    return [];
+  }
+}
+
+function renderLessons(c) {
+  const list = document.getElementById('lessonList');
+  list.innerHTML = '';
+  curLessons.forEach((lesson, i) => {
+    const div = document.createElement('div');
+    div.className = 'lesson-item';
+    const typeTag = lesson.type==='words' ? `${lesson.words.length} words`
+      : lesson.type==='letter' ? 'Letter practice'
+      : lesson.type==='spelling' ? `🔤 ${lesson.words.length} words`
+      : 'Read the story';
+    div.innerHTML = `
+      <div class="lesson-emoji-box" style="background:${c}18">${lesson.emoji}</div>
+      <div class="lesson-info">
+        <div class="lesson-name">${lesson.title}</div>
+        <div class="lesson-type-tag">${typeTag}</div>
+      </div>
+      <div class="lesson-start" style="background:${c}18;color:${c}">START</div>`;
+    div.onclick = () => startLesson(i);
+    list.appendChild(div);
+  });
+}
+
+// ============================================================
+// LESSON START
+// ============================================================
+function startLesson(idx) {
+  curLessonIdx = idx; curWordIdx = 0; stars = 0; wrongCnt = 0;
+  if (!curLessons || curLessons.length === 0) {
+    alert('No lessons found. Please try again.');
+    return;
+  }
+  if (curType === 'spelling') startSpelling();
+  else startReading();
+}
+
+function exitLesson() { stopMic(); stopSpeech(); goScreen('lessonScreen'); }
+
+// ============================================================
+// READING LESSON
+// ============================================================
+function getWords(lesson) {
+  if (lesson.type === 'words') return lesson.words;
+  if (lesson.type === 'letter') return [lesson.letter, ...lesson.words];
+  return lesson.sentence.split(' ');
+}
+
+function startReading() {
+  const lesson = curLessons[curLessonIdx];
+  const c = color(curLevel);
+  document.getElementById('readingHeader').style.background = c;
+  document.getElementById('readingHeaderTitle').textContent = lesson.title;
+  document.getElementById('progFill').style.background = c;
+  document.getElementById('progCount').style.color = c;
+  document.getElementById('micBtn').style.background = c;
+  updateReadingWord();
+  goScreen('readingScreen');
+}
+
+function updateReadingWord() {
+  const lesson = curLessons[curLessonIdx];
+  const words = getWords(lesson);
+  const word = words[curWordIdx];
+  const c = color(curLevel);
+  const isFil = curLang === 'Filipino';
+
+  document.getElementById('wordEmoji').textContent = lesson.emoji;
+  document.getElementById('wordText').textContent = word;
+  document.getElementById('wordText').style.color = c;
+  document.getElementById('wordText').style.fontSize =
+    (lesson.type==='words'||lesson.type==='letter') ? '48px' : '20px';
+  document.getElementById('wordHint').textContent = isFil ? 'Basahin nang malakas! 🎤' : 'Read this out loud! 🎤';
+  document.getElementById('heardTxt').textContent = '';
+  document.getElementById('feedbackBar').style.display = 'none';
+  document.getElementById('revealBar').style.display = wrongCnt >= 3 ? 'flex' : 'none';
+  document.getElementById('revealTxt').textContent = isFil ? 'Pakinggan ang tamang pagbigkas' : 'Hear correct pronunciation';
+
+  const pct = ((curWordIdx+1)/words.length*100).toFixed(0);
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('progCount').textContent = `${curWordIdx+1}/${words.length}`;
+  document.getElementById('progStars').textContent = '⭐'.repeat(Math.min(stars,5));
+  updateWrongDots('wrongRow');
+}
+
+function updateWrongDots(elId) {
+  const el = document.getElementById(elId);
+  if (wrongCnt === 0) { el.innerHTML=''; return; }
+  const isFil = curLang==='Filipino';
+  let h = `<span style="font-size:12px;color:#aaa">${isFil?'Mali:':'Wrong:'} </span>`;
+  for(let i=0;i<3;i++) h += `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;margin:0 2px;background:${i<wrongCnt?'#ff4444':'#e0e0e0'}"></span>`;
+  el.innerHTML = h;
+}
+
+// ============================================================
+// SPEECH RECOGNITION
+// ============================================================
+function toggleMic() { isListening ? stopMic() : startMic(); }
+
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Please use Chrome or Edge for speech recognition.'); return; }
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 3;
+
+  recognition.onstart = () => {
+    isListening = true;
+    const c = color(curLevel);
+    document.getElementById('micBtn').style.background = '#E53935';
+    document.getElementById('micBtn').classList.add('pulsing');
+    document.getElementById('micHint').textContent = curLang==='Filipino' ? 'Nakikinig... 👂' : 'Listening... 👂';
+    startWave(c);
+  };
+
+  recognition.onresult = e => {
+    let interim='', final='';
+    for(let i=e.resultIndex;i<e.results.length;i++) {
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) final+=t; else interim+=t;
+    }
+    const heard = (final||interim).toLowerCase().trim();
+    if(heard) document.getElementById('heardTxt').textContent = `Heard: "${heard}"`;
+    if(final) { stopMic(); checkAnswer(final.toLowerCase().trim()); }
+  };
+
+  recognition.onerror = e => { stopMic(); };
+  recognition.onend = () => { if(isListening) stopMic(); };
+  recognition.start();
+}
+
+function stopMic() {
+  isListening = false;
+  if(recognition) { try{recognition.stop();}catch(e){} recognition=null; }
+  const c = color(curLevel);
+  document.getElementById('micBtn').style.background = c;
+  document.getElementById('micBtn').classList.remove('pulsing');
+  document.getElementById('micHint').textContent = curLang==='Filipino' ? 'Pindutin para basahin! 👇' : 'Tap to read! 👇';
+  stopWave();
+}
+
+function startWave(c) {
+  const bars = document.querySelectorAll('#waveRow .wave-b');
+  waveInt = setInterval(() => {
+    bars.forEach(b => {
+      const h = 6 + Math.random() * 36;
+      b.style.height = h+'px';
+      b.style.background = c;
+    });
+  }, 100);
+}
+
+function stopWave() {
+  if(waveInt){clearInterval(waveInt);waveInt=null;}
+  document.querySelectorAll('#waveRow .wave-b').forEach(b=>{b.style.height='6px';b.style.background='#e0e0e0';});
+}
+
+function checkAnswer(spoken) {
+  const lesson = curLessons[curLessonIdx];
+  const words = getWords(lesson);
+  const target = words[curWordIdx].toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
+  const spokenClean = spoken.replace(/[^a-z0-9\s]/g,'').trim();
+  const isFil = curLang === 'Filipino';
+
+  // For Filipino: more lenient matching (speech recognition struggles with Filipino)
+  // For English: strict matching
+  let correct = false;
+  if (isFil) {
+    // Lenient: similarity > 0.5 or contains partial match
+    correct = spokenClean === target
+      || spokenClean.includes(target)
+      || target.includes(spokenClean)
+      || similarity(target, spokenClean) > 0.5
+      || spokenClean.split(' ').some(w => similarity(w, target) > 0.6);
+  } else {
+    // Strict for English
+    correct = spokenClean === target
+      || spokenClean.split(' ').some(w => w === target)
+      || (target.split(' ').length > 1 && similarity(target, spokenClean) > 0.75);
+  }
+
+
+
+  if (correct) {
+    wrongCnt = 0; stars++;
+    showFeedback('readingScreen', true, isFil ? '🎉 Magaling! Tama!' : '🎉 Great job! Correct!');
+    setTimeout(() => {
+      hideFeedback('readingScreen');
+      curWordIdx++;
+      if(curWordIdx >= words.length) showCompletion();
+      else { wrongCnt=0; updateReadingWord(); }
+    }, 1500);
+  } else {
+    wrongCnt++;
+    updateWrongDots('wrongRow');
+    if(wrongCnt >= 3) document.getElementById('revealBar').style.display='flex';
+    showFeedback('readingScreen', false,
+      isFil ? `😊 Subukan ulit!\nSabihin: "${words[curWordIdx]}"\nNarinig: "${spoken}"`
+             : `😊 Try again!\nSay: "${words[curWordIdx]}"\nHeard: "${spoken}"`);
+    setTimeout(() => hideFeedback('readingScreen'), 3000);
+  }
+}
+
+function doReveal() {
+  const lesson = curLessons[curLessonIdx];
+  const words = getWords(lesson);
+  speak(words[curWordIdx], curLang==='Filipino'?'fil-PH':'en-US');
+}
+
+function showFeedback(screen, ok, msg) {
+  const el = document.getElementById(screen==='readingScreen'?'feedbackBar':'spFeedback');
+  el.textContent = msg; el.style.display='block';
+  el.style.background = ok?'rgba(76,175,80,0.08)':'rgba(255,152,0,0.08)';
+  el.style.borderColor = ok?'#4CAF50':'#FF9800';
+  el.style.color = ok?'#2e7d32':'#e65100';
+}
+function hideFeedback(screen) {
+  document.getElementById(screen==='readingScreen'?'feedbackBar':'spFeedback').style.display='none';
+}
+
+function similarity(a,b) {
+  if(a===b) return 1; if(!a||!b) return 0;
+  let m=0; const s=a.length<b.length?a:b; const l=a.length<b.length?b:a;
+  for(let i=0;i<s.length;i++) if(i<l.length&&s[i]===l[i]) m++;
+  return m/l.length;
+}
+
+// ============================================================
+// SPELLING LESSON
+// ============================================================
+let spWordIdx=0, spWrongCnt=0, spStars=0;
+
+function startSpelling() {
+  const lesson = curLessons[curLessonIdx];
+  const c = color(curLevel);
+  spWordIdx=0; spWrongCnt=0; spStars=0;
+  document.getElementById('spellingHeader').style.background = c;
+  document.getElementById('spellingHeaderTitle').textContent = lesson.title;
+  document.getElementById('spProgFill').style.background = c;
+  document.getElementById('spProgCount').style.color = c;
+  document.getElementById('listenBtn').style.borderColor = c;
+  document.getElementById('listenBtn').style.color = c;
+  document.getElementById('spInput').style.borderColor = c;
+  document.getElementById('checkBtn').style.background = c;
+  updateSpellWord();
+  goScreen('spellingScreen');
+}
+
+function updateSpellWord() {
+  const lesson = curLessons[curLessonIdx];
+  const isFil = curLang === 'Filipino';
+  spWrongCnt = 0;
+  document.getElementById('spEmoji').textContent = lesson.emoji;
+  document.getElementById('spInstruction').textContent = isFil ? 'Pakinggan at i-spell ang salita' : 'Listen and spell the word';
+  document.getElementById('listenTxt').textContent = isFil ? 'Pakinggan ang salita' : 'Hear the word';
+  document.getElementById('spInput').value = '';
+  document.getElementById('spFeedback').style.display = 'none';
+  document.getElementById('spRevealBar').style.display = 'none';
+  document.getElementById('spRevealTxt').textContent = isFil ? 'Ipakita ang tamang ispeling' : 'Reveal correct spelling';
+  const pct = ((spWordIdx+1)/lesson.words.length*100).toFixed(0);
+  document.getElementById('spProgFill').style.width = pct+'%';
+  document.getElementById('spProgCount').textContent = `${spWordIdx+1}/${lesson.words.length}`;
+  document.getElementById('spProgStars').textContent = '⭐'.repeat(Math.min(spStars,5));
+  updateWrongDots('spWrongRow');
+  setTimeout(speakWord, 400);
+}
+
+function speakWord() {
+  const lesson = curLessons[curLessonIdx];
+  speak(lesson.words[spWordIdx], curLang==='Filipino'?'fil-PH':'en-US');
+}
+
+function checkSpell() {
+  const lesson = curLessons[curLessonIdx];
+  const input = document.getElementById('spInput').value.trim().toLowerCase();
+  const target = lesson.words[spWordIdx].toLowerCase().trim();
+  const isFil = curLang === 'Filipino';
+  if(!input) return;
+
+  if(input === target) {
+    spStars++;
+    showFeedback('spellingScreen', true, isFil ? `🎉 Tama! "${lesson.words[spWordIdx]}" ✅` : `🎉 Correct! "${lesson.words[spWordIdx]}" ✅`);
+    setTimeout(() => {
+      hideFeedback('spellingScreen');
+      spWordIdx++;
+      if(spWordIdx >= lesson.words.length) { stars=spStars; showCompletion(); }
+      else updateSpellWord();
+    }, 1500);
+  } else {
+    spWrongCnt++;
+    updateWrongDots('spWrongRow');
+    if(spWrongCnt >= 3) document.getElementById('spRevealBar').style.display='flex';
+    showFeedback('spellingScreen', false, isFil ? `❌ Mali! Sinulat mo: "${input}"` : `❌ Wrong! You typed: "${input}"`);
+  }
+}
+
+function revealSpell() {
+  const lesson = curLessons[curLessonIdx];
+  const isFil = curLang === 'Filipino';
+  showFeedback('spellingScreen', false,
+    isFil ? `💡 Tamang ispeling: "${lesson.words[spWordIdx]}"` : `💡 Correct spelling: "${lesson.words[spWordIdx]}"`);
+  speak(lesson.words[spWordIdx], curLang==='Filipino'?'fil-PH':'en-US');
+}
+
+// ============================================================
+// TEXT TO SPEECH
+// ============================================================
+function speak(text, lang) {
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang || 'en-US';
+  u.rate = 0.75; u.pitch=1.0; u.volume=1.0;
+  window.speechSynthesis.speak(u);
+}
+function stopSpeech() { if(window.speechSynthesis) window.speechSynthesis.cancel(); }
+
+// ============================================================
+// COMPLETION
+// ============================================================
+function showCompletion() {
+  stopMic(); stopSpeech();
+  const c = color(curLevel);
+  const isFil = curLang === 'Filipino';
+  // Make sure completion screen is visible
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const compScreen = document.getElementById('completionScreen');
+  compScreen.classList.add('active');
+  compScreen.style.background = `linear-gradient(180deg,${c},${c}99)`;
+  document.getElementById('compTitle').textContent = isFil ? 'Tapos na ang Aralin! 🎉' : 'Lesson Complete! 🎉';
+  document.getElementById('compStars').textContent = '⭐'.repeat(Math.min(stars,5));
+  document.getElementById('compSub').textContent = isFil ? `Nakakuha ka ng ${stars} bituin!` : `You earned ${stars} stars!`;
+  document.getElementById('retryBtn').textContent = isFil ? '🔄 Ulitin ang Aralin' : '🔄 Retry Lesson';
+  document.getElementById('homeBtn').textContent = isFil ? '🏠 Bumalik sa Home' : '🏠 Back to Home';
+  document.getElementById('moreLessonsLink').textContent = isFil ? 'Subukan ang iba pang aralin' : 'Try More Lessons';
+  stats.stars += stars; stats.lessons += 1;
+  if(stars >= 5) stats.badges += 1;
+  saveStats();
+}
+
+function retryLesson() { startLesson(curLessonIdx); }
+</script>
+</body>
+</html>
